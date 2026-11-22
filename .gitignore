@@ -1,0 +1,15 @@
+.sf/
+.sfdx/
+.sfdx-hardis/
+node_modules/
+coverage/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
