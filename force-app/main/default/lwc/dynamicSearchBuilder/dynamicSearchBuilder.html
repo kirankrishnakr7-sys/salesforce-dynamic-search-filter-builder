@@ -1,0 +1,425 @@
+<template>
+
+    <lightning-card>
+
+        <div class="builder-container">
+
+
+
+            <!-- Header -->
+
+            <div class="builder-header">
+
+                <div class="builder-title">
+
+                    Dynamic Search & Filter Builder
+
+                </div>
+
+                <div class="builder-subtitle">
+
+                    Search Salesforce records using dynamic filters
+
+                    and customise the fields displayed in your results.
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Search Configuration -->
+
+            <div class="section-card">
+
+                <div class="section-heading">
+
+1. Search Configuration
+
+                </div>
+
+
+
+                <div class="slds-grid slds-wrap slds-gutters">
+
+
+
+                    <div class="slds-col slds-size_1-of-1
+
+                                slds-medium-size_1-of-3">
+
+                        <lightning-combobox
+
+                            label="Select Object"
+
+                            placeholder="Choose an object"
+
+                            options={objectOptions}
+
+                            value={selectedObject}
+
+                            onchange={handleObjectChange}>
+
+                        </lightning-combobox>
+
+                    </div>
+
+
+
+                    <div class="slds-col slds-size_1-of-1
+
+                                slds-medium-size_1-of-3">
+
+                        <lightning-combobox
+
+                            label="Filter Field"
+
+                            placeholder="Choose a field"
+
+                            options={fieldOptions}
+
+                            value={selectedField}
+
+                            onchange={handleFieldChange}>
+
+                        </lightning-combobox>
+
+                    </div>
+
+
+
+                    <div class="slds-col slds-size_1-of-1
+
+                                slds-medium-size_1-of-3">
+
+                        <lightning-combobox
+
+                            label="Operator"
+
+                            placeholder="Choose an operator"
+
+                            options={operatorOptions}
+
+                            value={selectedOperator}
+
+                            onchange={handleOperatorChange}>
+
+                        </lightning-combobox>
+
+                    </div>
+
+
+
+                </div>
+
+
+
+                <!-- Filter Value -->
+
+                <template if:true={selectedOperator}>
+
+                    <div class="slds-m-top_large">
+
+                        <div class="section-heading">
+
+02\. Filter Value
+
+                        </div>
+
+
+
+                        <template if:true={isStandardValueField}>
+
+                            <lightning-input
+
+                                label="Enter Filter Value"
+
+                                type={valueInputType}
+
+                                value={filterValue}
+
+                                onchange={handleValueChange}>
+
+                            </lightning-input>
+
+                        </template>
+
+
+
+                        <template if:true={isBooleanField}>
+
+                            <lightning-input
+
+                                type="checkbox"
+
+                                label="Filter Value"
+
+                                checked={filterValue}
+
+                                onchange={handleValueChange}>
+
+                            </lightning-input>
+
+                        </template>
+
+
+
+                        <template if:true={isPicklistField}>
+
+                            <lightning-combobox
+
+                                label="Select Filter Value"
+
+                                placeholder="Choose a value"
+
+                                options={picklistOptions}
+
+                                value={filterValue}
+
+                                onchange={handleValueChange}>
+
+                            </lightning-combobox>
+
+                        </template>
+
+                    </div>
+
+                </template>
+
+
+
+                <!-- Search Button -->
+
+                <div class="search-action">
+
+                    <lightning-button
+
+                        label="Search Records"
+
+                        variant="brand"
+
+                        icon-name="utility:search"
+
+                        onclick={handleSearch}
+
+                        disabled={isLoading}>
+
+                    </lightning-button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Result Fields -->
+
+            <template if:true={hasFields}>
+
+                <div class="section-card">
+
+                    <div class="section-heading">
+
+03\. Configure Result Columns
+
+                    </div>
+
+
+
+                    <p class="builder-subtitle slds-m-bottom_medium">
+
+                        Choose up to 5 fields to display in the results.
+
+                    </p>
+
+
+
+                    <lightning-dual-listbox
+
+                        name="resultFields"
+
+                        label="Select Result Fields"
+
+                        source-label="Available Fields"
+
+                        selected-label="Selected Fields"
+
+                        options={fieldOptions}
+
+                        value={selectedDisplayFields}
+
+                        max="5"
+
+                        onchange={handleDisplayFieldsChange}>
+
+                    </lightning-dual-listbox>
+
+                </div>
+
+            </template>
+
+
+
+            <!-- Loading -->
+
+            <template if:true={isLoading}>
+
+                <div class="slds-m-around_medium">
+
+                    <lightning-spinner
+
+                        alternative-text="Loading results..."
+
+                        size="medium">
+
+                    </lightning-spinner>
+
+                </div>
+
+            </template>
+
+
+
+            <!-- Error -->
+
+            <template if:true={errorMessage}>
+
+                <div class="slds-text-color_error slds-m-bottom_medium">
+
+                    {errorMessage}
+
+                </div>
+
+            </template>
+
+
+
+            <!-- Search Results -->
+
+            <template if:true={searchResults.length}>
+
+                <div class="section-card results-section">
+
+
+
+                    <div class="section-heading">
+
+04\. Search Results
+
+                    </div>
+
+
+
+                    <lightning-datatable
+
+                        key-field="Id"
+
+                        data={paginatedResults}
+
+                        columns={columns}
+
+                        hide-checkbox-column>
+
+                    </lightning-datatable>
+
+
+
+                    <!-- Pagination -->
+
+                    <div class="pagination-section">
+
+
+
+                        <div class="builder-subtitle">
+
+                            Page {currentPage} of {totalPages}
+
+                            ({searchResults.length} records)
+
+                        </div>
+
+
+
+                        <div>
+
+                            <lightning-button
+
+                                label="Previous"
+
+                                onclick={handlePreviousPage}
+
+                                disabled={isPreviousDisabled}>
+
+                            </lightning-button>
+
+
+
+                            <lightning-button
+
+                                label="Next"
+
+                                onclick={handleNextPage}
+
+                                disabled={isNextDisabled}
+
+                                class="slds-m-left_small">
+
+                            </lightning-button>
+
+                        </div>
+
+
+
+                    </div>
+
+                </div>
+
+            </template>
+
+
+
+            <!-- No Records -->
+
+            <template if:true={hasNoResults}>
+
+                <div class="empty-state">
+
+                    <lightning-icon
+
+                        icon-name="utility:search"
+
+                        size="large"
+
+                        alternative-text="No records">
+
+                    </lightning-icon>
+
+
+
+                    <h3 class="slds-text-heading_small slds-m-top_medium">
+
+                        No Records Found
+
+                    </h3>
+
+
+
+                    <p class="builder-subtitle">
+
+                        No records match your selected filter.
+
+                        Try changing your search criteria.
+
+                    </p>
+
+                </div>
+
+            </template>
+
+
+
+        </div>
+
+    </lightning-card>
+
+</template>
