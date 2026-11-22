@@ -1,4 +1,8 @@
-// =====================================================
+public with sharing class DynamicSearchController {
+
+
+
+    // =====================================================
 
     // 1. OBJECT OPTION WRAPPER
 
